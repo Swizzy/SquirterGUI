@@ -77,12 +77,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ComboBoxItem.cs" />
+    <Compile Include="CTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="CToolStripLabel.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="CToolStripProgressBar.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="FTDI.cs" />
     <Compile Include="FtdcspiWrapper.cs" />
     <Compile Include="Main.cs">
       <SubType>Form</SubType>
@@ -92,6 +96,8 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="xNAND.cs" />
+    <Compile Include="XNANDSettings.cs" />
     <Compile Include="xSPI.cs" />
     <EmbeddedResource Include="Main.resx">
       <DependentUpon>Main.cs</DependentUpon>
@@ -104,6 +110,7 @@
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
     </Compile>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

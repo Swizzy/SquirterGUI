@@ -17,9 +17,29 @@ namespace SquirterGUI {
                     catch {}
                 }
                 else if (ProgressBar != null)
-                {
                     base.Value = value;
+            }
+        }
+
+        public new int Maximum 
+        {
+            get
+            {
+                return base.Maximum;
+            }
+            set
+            {
+                if (Parent != null && Parent.InvokeRequired)
+                {
+                    try
+                    {
+                        SetInt setDel = delegate { base.Maximum = value; };
+                        Parent.Invoke(setDel, new object[] { value });
+                    }
+                    catch { }
                 }
+                else if (ProgressBar != null)
+                    base.Maximum = value;
             }
         }
     }

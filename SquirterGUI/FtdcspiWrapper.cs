@@ -1,7 +1,6 @@
 ﻿using System;
 
 namespace SquirterGUI {
-    using System.Collections.Generic;
     using System.Runtime.InteropServices;
     using System.Text;
 
@@ -70,10 +69,6 @@ namespace SquirterGUI {
         #endregion Constants
 
         #region DLL Imports
-
-        [DllImport("ftd2xx.dll", EntryPoint = "FT_Write", CallingConvention = CallingConvention.Cdecl)] private static extern uint FT_Write(IntPtr ftHandle, byte[] lpBuffer, uint dwBytesToWrite, ref uint lpBytesWritten);
-
-        [DllImport("ftd2xx.dll", EntryPoint = "FT_Read", CallingConvention = CallingConvention.Cdecl)] private static extern uint FT_Read(IntPtr ftHandle, ref byte[] lpBuffer, uint dwBytesToRead, ref uint lpBytesReturned);
 
         [DllImport("ftcspi.dll", EntryPoint = "SPI_GetDllVersion",
             CallingConvention = CallingConvention.Cdecl)] private static extern uint GetDllVersion(byte[] pDllVersion, uint buufferSize);
@@ -327,8 +322,10 @@ namespace SquirterGUI {
 
         #endregion DLL Crap
 
+        readonly FTDI _ftdi = new FTDI();
+
         private uint _status;
-        readonly byte[] _byOutputBuffer = new byte[65535];
+        byte[] _byOutputBuffer = new byte[65535];
         byte _dwLowPinsValue;
         uint _dwNumBytesToSend; // Index to the output buffer
         uint _dwNumBytesSent; // Count of actual bytes sent - used with FT_Write
@@ -466,6 +463,8 @@ namespace SquirterGUI {
 
         public void SendBytesToDevice()
         {
+            if (IntPtr.Zero == _ftdi.GetFtHandle())
+                _ftdi.SetFtHandle(_ftHandle);
             _status = FtcSuccess;
             uint numBytesSent = 0;
             uint dwTotalNumBytesSent = 0;
@@ -477,16 +476,13 @@ namespace SquirterGUI {
                         dwNumDataBytesToSend = MaxNumBytesUsbWrite;
                     else
                         dwNumDataBytesToSend = (_dwNumBytesToSend - dwTotalNumBytesSent);
-                    _status = FT_Write(_ftHandle,
-                                       _byOutputBuffer,
-                                       dwNumDataBytesToSend,
-                                       ref numBytesSent);
+                    _status = (uint)_ftdi.Write(_byOutputBuffer, dwNumDataBytesToSend, ref numBytesSent);
                     dwTotalNumBytesSent = dwTotalNumBytesSent + numBytesSent;
                 }
                 while ((dwTotalNumBytesSent < _dwNumBytesToSend) && (_status == FtcSuccess));
             }
             else
-                _status = FT_Write(_ftHandle, _byOutputBuffer, _dwNumBytesToSend, ref numBytesSent);
+                _status = (uint)_ftdi.Write(_byOutputBuffer, _dwNumBytesToSend, ref numBytesSent);
             _dwNumBytesToSend = 0;
         }
 
@@ -499,6 +495,7 @@ namespace SquirterGUI {
         {
             if(bClearOutputBuffer)
                 ClearOutputBuffer();
+            Array.Resize(ref _byOutputBuffer, _byOutputBuffer.Length + 1);
             _byOutputBuffer[_dwNumBytesToSend++] = dataByte;
         }
 
@@ -507,13 +504,15 @@ namespace SquirterGUI {
             AddByteToOutputBuffer(SendAnswerBackImmediatelyCmd, false);	
         }
 
-        public void GetDataFromDevice(uint dwNumBytesToRead, ref byte[] readDataBuffer, int offset)
+        public bool GetDataFromDevice(uint dwNumBytesToRead, ref byte[] readDataBuffer, int offset)
         {
-            var buf = new byte[dwNumBytesToRead];
+            if (IntPtr.Zero == _ftdi.GetFtHandle())
+                _ftdi.SetFtHandle(_ftHandle);
             uint dwNumBytesRead = 0;
             var tryCount = 10;
             do {
-                FT_Read(_ftHandle, ref buf, dwNumBytesToRead, ref dwNumBytesRead);
+                var buf = new byte[dwNumBytesToRead];
+                _ftdi.Read(buf, dwNumBytesToRead, ref dwNumBytesRead);
                 dwNumBytesToRead -= dwNumBytesRead;
                 if (dwNumBytesToRead == 0)
                     Buffer.BlockCopy(buf, 0, readDataBuffer, offset, buf.Length);
@@ -522,8 +521,7 @@ namespace SquirterGUI {
                     offset += (int) dwNumBytesRead;
                 }
             } while(dwNumBytesToRead > 0 && tryCount-- > 0);
-            if( tryCount <= 0 )
-                throw new Exception("ERROR: NO DATA FROM DEVICE"); 
+            return (tryCount > 0);
         }
 
         public void DisableSpiChip()
@@ -544,7 +542,7 @@ namespace SquirterGUI {
             AddByteToOutputBuffer(0xFB, false);
         }
 
-        public void AddWriteOutBuffer(uint dwNumControlBitsToWrite, IList<byte> pWriteControlBuffer)
+        public void AddWriteOutBuffer(uint dwNumControlBitsToWrite, byte[] pWriteControlBuffer)
         {
             var dwControlBufferIndex = 0;
 
@@ -569,8 +567,9 @@ namespace SquirterGUI {
                 // now add the data bytes to go out
                 do
                 {
+                    Array.Resize(ref pWriteControlBuffer, pWriteControlBuffer.Length + 1);
                     AddByteToOutputBuffer(pWriteControlBuffer[dwControlBufferIndex], false);
-                    dwControlBufferIndex = (dwControlBufferIndex + 1);
+                    dwControlBufferIndex++;
                 }
                 while (dwControlBufferIndex < (dwNumControlBytes + 1));
             }
@@ -618,23 +617,24 @@ namespace SquirterGUI {
 
         public void SpiSetCs(bool chipSelect)
         {
-
+            if (IntPtr.Zero == _ftdi.GetFtHandle())
+                _ftdi.SetFtHandle(_ftHandle);
             _dwNumBytesToSend = 0; // Index to the output buffer
             _dwNumBytesSent = 0; // Count of actual bytes sent - used with FT_Write
             _byOutputBuffer[_dwNumBytesToSend++] = 0x80;
             _dwLowPinsValue = (byte) (chipSelect ? 0x08 : 0x00);
             _byOutputBuffer[_dwNumBytesToSend++] = _dwLowPinsValue;
             _byOutputBuffer[_dwNumBytesToSend++] = 0x3E; // byDirection
-            var ftStatus = FT_Write(_ftHandle, _byOutputBuffer, _dwNumBytesToSend, ref _dwNumBytesSent);
+            _ftdi.Write(_byOutputBuffer, _dwNumBytesToSend, ref _dwNumBytesSent);
             _dwNumBytesToSend = 0;
         }
 
         public void SpiSetGpio(bool xxLo, bool ejLo)
         {
+            if (IntPtr.Zero == _ftdi.GetFtHandle())
+                _ftdi.SetFtHandle(_ftHandle);
             _dwNumBytesToSend = 0; // Index to the output buffer
             _dwNumBytesSent = 0; // Count of actual bytes sent - used with FT_Write
-            var dwNumBytesToRead = 0;
-
             _byOutputBuffer[_dwNumBytesToSend++] = 0x80;
             _dwLowPinsValue = 0;
             if (xxLo)
@@ -647,7 +647,7 @@ namespace SquirterGUI {
                 _dwLowPinsValue = (byte)(_dwLowPinsValue | 0x00);
             _byOutputBuffer[_dwNumBytesToSend++] = _dwLowPinsValue; 
             _byOutputBuffer[_dwNumBytesToSend++] = 0x3E; // byDirection
-            var ftStatus = FT_Write(_ftHandle, _byOutputBuffer, _dwNumBytesToSend, ref _dwNumBytesSent);
+            _ftdi.Write(_byOutputBuffer, _dwNumBytesToSend, ref _dwNumBytesSent);
             _dwNumBytesToSend = 0;
         }
     }

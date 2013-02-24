@@ -28,15 +28,16 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.components = new System.ComponentModel.Container();
+            this.settingsbox = new System.Windows.Forms.GroupBox();
+            this.blockcountbox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.radioButton2 = new System.Windows.Forms.RadioButton();
-            this.radioButton1 = new System.Windows.Forms.RadioButton();
+            this.logging = new System.Windows.Forms.CheckBox();
+            this.modebox = new System.Windows.Forms.GroupBox();
+            this.glitchmode = new System.Windows.Forms.RadioButton();
+            this.rawmode = new System.Windows.Forms.RadioButton();
             this.sizebox = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -45,45 +46,49 @@
             this.dumpbtn = new System.Windows.Forms.Button();
             this.writebtn = new System.Windows.Forms.Button();
             this.erasebtn = new System.Windows.Forms.Button();
-            this.textBox3 = new System.Windows.Forms.TextBox();
+            this.flashconfigbox = new SquirterGUI.CTextBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.groupBox3 = new System.Windows.Forms.GroupBox();
-            this.textBox5 = new System.Windows.Forms.TextBox();
+            this.infobox = new System.Windows.Forms.GroupBox();
+            this.totalblockoutbox = new SquirterGUI.CTextBox();
             this.label6 = new System.Windows.Forms.Label();
-            this.textBox4 = new System.Windows.Forms.TextBox();
+            this.startblockoutbox = new SquirterGUI.CTextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.errorbox = new System.Windows.Forms.RichTextBox();
             this.bw = new System.ComponentModel.BackgroundWorker();
-            this.groupBox1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
+            this.sfd = new System.Windows.Forms.SaveFileDialog();
+            this.ofd = new System.Windows.Forms.OpenFileDialog();
+            this.tooltip = new System.Windows.Forms.ToolTip(this.components);
+            this.settingsbox.SuspendLayout();
+            this.modebox.SuspendLayout();
             this.statusStrip1.SuspendLayout();
-            this.groupBox3.SuspendLayout();
+            this.infobox.SuspendLayout();
             this.SuspendLayout();
             // 
-            // groupBox1
+            // settingsbox
             // 
-            this.groupBox1.Controls.Add(this.textBox2);
-            this.groupBox1.Controls.Add(this.label3);
-            this.groupBox1.Controls.Add(this.textBox1);
-            this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Controls.Add(this.checkBox1);
-            this.groupBox1.Controls.Add(this.groupBox2);
-            this.groupBox1.Controls.Add(this.sizebox);
-            this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Location = new System.Drawing.Point(12, 12);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(231, 117);
-            this.groupBox1.TabIndex = 0;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Settings";
+            this.settingsbox.Controls.Add(this.blockcountbox);
+            this.settingsbox.Controls.Add(this.label3);
+            this.settingsbox.Controls.Add(this.textBox1);
+            this.settingsbox.Controls.Add(this.label2);
+            this.settingsbox.Controls.Add(this.logging);
+            this.settingsbox.Controls.Add(this.modebox);
+            this.settingsbox.Controls.Add(this.sizebox);
+            this.settingsbox.Controls.Add(this.label1);
+            this.settingsbox.Location = new System.Drawing.Point(12, 12);
+            this.settingsbox.Name = "settingsbox";
+            this.settingsbox.Size = new System.Drawing.Size(231, 117);
+            this.settingsbox.TabIndex = 0;
+            this.settingsbox.TabStop = false;
+            this.settingsbox.Text = "Settings";
             // 
-            // textBox2
+            // blockcountbox
             // 
-            this.textBox2.Location = new System.Drawing.Point(140, 87);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(85, 20);
-            this.textBox2.TabIndex = 6;
+            this.blockcountbox.Location = new System.Drawing.Point(140, 87);
+            this.blockcountbox.Name = "blockcountbox";
+            this.blockcountbox.Size = new System.Drawing.Size(85, 20);
+            this.blockcountbox.TabIndex = 6;
+            this.blockcountbox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.HexOnlyInput);
             // 
             // label3
             // 
@@ -101,6 +106,7 @@
             this.textBox1.Size = new System.Drawing.Size(85, 20);
             this.textBox1.TabIndex = 6;
             this.textBox1.Text = "0";
+            this.textBox1.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.HexOnlyInput);
             // 
             // label2
             // 
@@ -111,51 +117,53 @@
             this.label2.TabIndex = 5;
             this.label2.Text = "Startblock:";
             // 
-            // checkBox1
+            // logging
             // 
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Checked = true;
-            this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox1.Location = new System.Drawing.Point(120, 21);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(105, 17);
-            this.checkBox1.TabIndex = 4;
-            this.checkBox1.Text = "Logging enabled";
-            this.checkBox1.UseVisualStyleBackColor = true;
+            this.logging.AutoSize = true;
+            this.logging.Checked = true;
+            this.logging.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.logging.Location = new System.Drawing.Point(120, 21);
+            this.logging.Name = "logging";
+            this.logging.Size = new System.Drawing.Size(105, 17);
+            this.logging.TabIndex = 4;
+            this.logging.Text = "Logging enabled";
+            this.logging.UseVisualStyleBackColor = true;
             // 
-            // groupBox2
+            // modebox
             // 
-            this.groupBox2.Controls.Add(this.radioButton2);
-            this.groupBox2.Controls.Add(this.radioButton1);
-            this.groupBox2.Location = new System.Drawing.Point(6, 46);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(64, 65);
-            this.groupBox2.TabIndex = 3;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Mode";
+            this.modebox.Controls.Add(this.glitchmode);
+            this.modebox.Controls.Add(this.rawmode);
+            this.modebox.Location = new System.Drawing.Point(6, 46);
+            this.modebox.Name = "modebox";
+            this.modebox.Size = new System.Drawing.Size(64, 65);
+            this.modebox.TabIndex = 3;
+            this.modebox.TabStop = false;
+            this.modebox.Text = "Mode";
             // 
-            // radioButton2
+            // glitchmode
             // 
-            this.radioButton2.AutoSize = true;
-            this.radioButton2.Location = new System.Drawing.Point(6, 42);
-            this.radioButton2.Name = "radioButton2";
-            this.radioButton2.Size = new System.Drawing.Size(52, 17);
-            this.radioButton2.TabIndex = 2;
-            this.radioButton2.TabStop = true;
-            this.radioButton2.Text = "Glitch";
-            this.radioButton2.UseVisualStyleBackColor = true;
+            this.glitchmode.AutoSize = true;
+            this.glitchmode.Location = new System.Drawing.Point(6, 42);
+            this.glitchmode.Name = "glitchmode";
+            this.glitchmode.Size = new System.Drawing.Size(52, 17);
+            this.glitchmode.TabIndex = 2;
+            this.glitchmode.TabStop = true;
+            this.glitchmode.Text = "Glitch";
+            this.tooltip.SetToolTip(this.glitchmode, "Read without ECC data, Write with ECC data and recalculate ecc and block numbers");
+            this.glitchmode.UseVisualStyleBackColor = true;
             // 
-            // radioButton1
+            // rawmode
             // 
-            this.radioButton1.AutoSize = true;
-            this.radioButton1.Checked = true;
-            this.radioButton1.Location = new System.Drawing.Point(6, 19);
-            this.radioButton1.Name = "radioButton1";
-            this.radioButton1.Size = new System.Drawing.Size(51, 17);
-            this.radioButton1.TabIndex = 2;
-            this.radioButton1.TabStop = true;
-            this.radioButton1.Text = "RAW";
-            this.radioButton1.UseVisualStyleBackColor = true;
+            this.rawmode.AutoSize = true;
+            this.rawmode.Checked = true;
+            this.rawmode.Location = new System.Drawing.Point(6, 19);
+            this.rawmode.Name = "rawmode";
+            this.rawmode.Size = new System.Drawing.Size(51, 17);
+            this.rawmode.TabIndex = 2;
+            this.rawmode.TabStop = true;
+            this.rawmode.Text = "RAW";
+            this.tooltip.SetToolTip(this.rawmode, "Read/Write data in RAW mode means that we\'ll include ECC data");
+            this.rawmode.UseVisualStyleBackColor = true;
             // 
             // sizebox
             // 
@@ -229,13 +237,13 @@
             this.erasebtn.UseVisualStyleBackColor = true;
             this.erasebtn.Click += new System.EventHandler(this.ErasebtnClick);
             // 
-            // textBox3
+            // flashconfigbox
             // 
-            this.textBox3.Location = new System.Drawing.Point(81, 19);
-            this.textBox3.Name = "textBox3";
-            this.textBox3.ReadOnly = true;
-            this.textBox3.Size = new System.Drawing.Size(113, 20);
-            this.textBox3.TabIndex = 4;
+            this.flashconfigbox.Location = new System.Drawing.Point(81, 19);
+            this.flashconfigbox.Name = "flashconfigbox";
+            this.flashconfigbox.ReadOnly = true;
+            this.flashconfigbox.Size = new System.Drawing.Size(113, 20);
+            this.flashconfigbox.TabIndex = 4;
             // 
             // label4
             // 
@@ -246,28 +254,28 @@
             this.label4.TabIndex = 5;
             this.label4.Text = "Flashconfig:";
             // 
-            // groupBox3
+            // infobox
             // 
-            this.groupBox3.Controls.Add(this.textBox5);
-            this.groupBox3.Controls.Add(this.label6);
-            this.groupBox3.Controls.Add(this.textBox4);
-            this.groupBox3.Controls.Add(this.label5);
-            this.groupBox3.Controls.Add(this.textBox3);
-            this.groupBox3.Controls.Add(this.label4);
-            this.groupBox3.Location = new System.Drawing.Point(249, 12);
-            this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(200, 97);
-            this.groupBox3.TabIndex = 6;
-            this.groupBox3.TabStop = false;
-            this.groupBox3.Text = "Information";
+            this.infobox.Controls.Add(this.totalblockoutbox);
+            this.infobox.Controls.Add(this.label6);
+            this.infobox.Controls.Add(this.startblockoutbox);
+            this.infobox.Controls.Add(this.label5);
+            this.infobox.Controls.Add(this.flashconfigbox);
+            this.infobox.Controls.Add(this.label4);
+            this.infobox.Location = new System.Drawing.Point(249, 12);
+            this.infobox.Name = "infobox";
+            this.infobox.Size = new System.Drawing.Size(200, 97);
+            this.infobox.TabIndex = 6;
+            this.infobox.TabStop = false;
+            this.infobox.Text = "Information";
             // 
-            // textBox5
+            // totalblockoutbox
             // 
-            this.textBox5.Location = new System.Drawing.Point(81, 71);
-            this.textBox5.Name = "textBox5";
-            this.textBox5.ReadOnly = true;
-            this.textBox5.Size = new System.Drawing.Size(113, 20);
-            this.textBox5.TabIndex = 4;
+            this.totalblockoutbox.Location = new System.Drawing.Point(81, 71);
+            this.totalblockoutbox.Name = "totalblockoutbox";
+            this.totalblockoutbox.ReadOnly = true;
+            this.totalblockoutbox.Size = new System.Drawing.Size(113, 20);
+            this.totalblockoutbox.TabIndex = 4;
             // 
             // label6
             // 
@@ -278,13 +286,13 @@
             this.label6.TabIndex = 5;
             this.label6.Text = "Total Blocks:";
             // 
-            // textBox4
+            // startblockoutbox
             // 
-            this.textBox4.Location = new System.Drawing.Point(81, 45);
-            this.textBox4.Name = "textBox4";
-            this.textBox4.ReadOnly = true;
-            this.textBox4.Size = new System.Drawing.Size(113, 20);
-            this.textBox4.TabIndex = 4;
+            this.startblockoutbox.Location = new System.Drawing.Point(81, 45);
+            this.startblockoutbox.Name = "startblockoutbox";
+            this.startblockoutbox.ReadOnly = true;
+            this.startblockoutbox.Size = new System.Drawing.Size(113, 20);
+            this.startblockoutbox.TabIndex = 4;
             // 
             // label5
             // 
@@ -304,18 +312,28 @@
             this.label7.TabIndex = 8;
             this.label7.Text = "Errors:";
             // 
-            // richTextBox1
+            // errorbox
             // 
-            this.richTextBox1.Location = new System.Drawing.Point(249, 128);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(200, 88);
-            this.richTextBox1.TabIndex = 9;
-            this.richTextBox1.Text = "";
+            this.errorbox.Location = new System.Drawing.Point(249, 128);
+            this.errorbox.Name = "errorbox";
+            this.errorbox.ReadOnly = true;
+            this.errorbox.Size = new System.Drawing.Size(200, 88);
+            this.errorbox.TabIndex = 9;
+            this.errorbox.Text = "";
             // 
             // bw
             // 
             this.bw.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.BwRunWorkerCompleted);
+            // 
+            // sfd
+            // 
+            this.sfd.DefaultExt = "bin";
+            this.sfd.FileName = "flashdmp.bin";
+            this.sfd.Filter = "*.bin|Xbox 360 NAND";
+            // 
+            // ofd
+            // 
+            this.ofd.FileName = "openFileDialog1";
             // 
             // Main
             // 
@@ -323,25 +341,25 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
             this.ClientSize = new System.Drawing.Size(461, 247);
-            this.Controls.Add(this.richTextBox1);
+            this.Controls.Add(this.errorbox);
             this.Controls.Add(this.label7);
-            this.Controls.Add(this.groupBox3);
+            this.Controls.Add(this.infobox);
             this.Controls.Add(this.erasebtn);
             this.Controls.Add(this.writebtn);
             this.Controls.Add(this.dumpbtn);
             this.Controls.Add(this.statusStrip1);
-            this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.settingsbox);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "Main";
             this.Text = "Form1";
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
+            this.settingsbox.ResumeLayout(false);
+            this.settingsbox.PerformLayout();
+            this.modebox.ResumeLayout(false);
+            this.modebox.PerformLayout();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();
-            this.groupBox3.ResumeLayout(false);
-            this.groupBox3.PerformLayout();
+            this.infobox.ResumeLayout(false);
+            this.infobox.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -349,33 +367,36 @@
 
         #endregion
 
-        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox settingsbox;
         private System.Windows.Forms.ComboBox sizebox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.StatusStrip statusStrip1;
         private CToolStripProgressBar progressbar;
         private CToolStripLabel statuslabel;
-        private System.Windows.Forms.CheckBox checkBox1;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.RadioButton radioButton2;
-        private System.Windows.Forms.RadioButton radioButton1;
-        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.CheckBox logging;
+        private System.Windows.Forms.GroupBox modebox;
+        private System.Windows.Forms.RadioButton glitchmode;
+        private System.Windows.Forms.RadioButton rawmode;
+        private System.Windows.Forms.TextBox blockcountbox;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button dumpbtn;
         private System.Windows.Forms.Button writebtn;
         private System.Windows.Forms.Button erasebtn;
-        private System.Windows.Forms.TextBox textBox3;
+        private CTextBox flashconfigbox;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.GroupBox groupBox3;
-        private System.Windows.Forms.TextBox textBox5;
+        private System.Windows.Forms.GroupBox infobox;
+        private CTextBox totalblockoutbox;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.TextBox textBox4;
+        private CTextBox startblockoutbox;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.RichTextBox errorbox;
         private System.ComponentModel.BackgroundWorker bw;
+        private System.Windows.Forms.SaveFileDialog sfd;
+        private System.Windows.Forms.OpenFileDialog ofd;
+        private System.Windows.Forms.ToolTip tooltip;
     }
 }
 

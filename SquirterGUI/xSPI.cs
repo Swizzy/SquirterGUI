@@ -2,11 +2,11 @@
     using System;
     using System.Threading;
 
-    internal class xSPI {
+    internal class XSPI {
         private readonly FtdcspiWrapper _wrapper;
         internal readonly bool IsOk;
 
-        public xSPI() {
+        public XSPI() {
             _wrapper = new FtdcspiWrapper();
             IsOk = _wrapper.SpiInit();
         }
@@ -35,112 +35,113 @@
             throw new NotImplementedException("Poweron");
         }
 
-        byte[] Read(byte reg, int len) {
+        public byte[] Read(byte reg, int len) {
             var ret = new byte[len];
             var wbuf = new byte[] { (byte) ((reg << 2) | 1), 0xFF };
             _wrapper.EnableSpiChip();
-            _wrapper.AddWriteOutBuffer(0x20, wbuf);
+            _wrapper.AddWriteOutBuffer(0x8, wbuf);
             _wrapper.AddReadOutBuffer(0x20);
             _wrapper.DisableSpiChip();
             _wrapper.SetAnswerFast();
             _wrapper.SendBytesToDevice();
-            _wrapper.GetDataFromDevice(4, ref ret, 0);
-            return ret;
+            return _wrapper.GetDataFromDevice(4, ref ret, 0) ? ret : null;
         }
 
-        byte[] ReadSync(byte reg, int len) {
+        public byte[] ReadSync(byte reg, int len)
+        {
             var ret = new byte[len];
             var wbuf = new byte[] { (byte)((reg << 2) | 1), 0xFF };
             _wrapper.ClearOutputBuffer();
             _wrapper.EnableSpiChip();
-            _wrapper.AddWriteOutBuffer(0x20, wbuf);
+            _wrapper.AddWriteOutBuffer(0x8, wbuf);
             _wrapper.AddReadOutBuffer(0x20);
             _wrapper.DisableSpiChip();
             _wrapper.SetAnswerFast();
             _wrapper.SendBytesToDevice();
-            _wrapper.GetDataFromDevice(4, ref ret, 0);
-            return ret;
+            return _wrapper.GetDataFromDevice(4, ref ret, 0) ? ret : null;
         }
 
-        uint ReadWord(byte reg) {
+        public uint ReadWord(byte reg)
+        {
             var ret = new byte[2];
             var wbuf = new byte[] { (byte)((reg << 2) | 1), 0xFF };
             _wrapper.ClearOutputBuffer();
             _wrapper.EnableSpiChip();
-            _wrapper.AddWriteOutBuffer(0x20, wbuf);
+            _wrapper.AddWriteOutBuffer(0x8, wbuf);
             _wrapper.AddReadOutBuffer(0x10);
             _wrapper.DisableSpiChip();
             _wrapper.SetAnswerFast();
             _wrapper.SendBytesToDevice();
-            _wrapper.GetDataFromDevice(2, ref ret, 0);
-            return ret[0] | ((uint)ret[1]<<8);
+            return _wrapper.GetDataFromDevice(2, ref ret, 0) ? ret[0] | ((uint)ret[1]<<8) : 0;
         }
 
-        byte ReadByte(byte reg) {
+        public byte ReadByte(byte reg)
+        {
             var ret = new byte[1];
             var wbuf = new byte[] { (byte) ((reg << 2) | 1), 0xFF };
             _wrapper.ClearOutputBuffer();
             _wrapper.EnableSpiChip();
-            _wrapper.AddWriteOutBuffer(0x20, wbuf);
+            _wrapper.AddWriteOutBuffer(0x8, wbuf);
             _wrapper.AddReadOutBuffer(0x8);
             _wrapper.DisableSpiChip();
             _wrapper.SetAnswerFast();
             _wrapper.SendBytesToDevice();
-            _wrapper.GetDataFromDevice(1, ref ret, 0);
-            return ret[0];
+            return _wrapper.GetDataFromDevice(1, ref ret, 0) ? ret[0] : new byte();
         }
 
-        void Write(byte reg, byte[] data)
+        public void Write(byte reg, byte[] data, bool clear = true)
         {
             if (data.Length != 4)
                 return;
-            byte[] wbuf = new byte[5];
+            var wbuf = new byte[5];
             wbuf[0] = (byte)((reg << 2) | 2);
             Array.Copy(data, 0, wbuf, 1, data.Length);
-            DoWrite(wbuf);
+            DoWrite(wbuf, clear);
         }
 
-        void WriteSync(byte reg, byte[] data) {
+        public void WriteSync(byte reg, byte[] data, bool clear = true)
+        {
             if (data.Length != 4)
                 return;
-            byte[] wbuf = new byte[5];
+            var wbuf = new byte[5];
             wbuf[0] = (byte) ((reg << 2) | 2);
             Array.Copy(data, 0, wbuf, 1, data.Length);
-            DoWrite(wbuf, true);
+            DoWrite(wbuf, clear);
         }
 
-        void WriteWord(byte reg, uint data)
+        public void WriteWord(byte reg, uint data, bool clear = true)
         {
-            byte[] wbuf = new byte[5];
+            var wbuf = new byte[5];
             wbuf[0] = (byte)((reg << 2) | 2);
             var tmp = BitConverter.GetBytes(data);
             Array.Copy(tmp, 0, wbuf, 1, tmp.Length);
-            DoWrite(wbuf, true);
+            DoWrite(wbuf, clear);
         }
 
-        void WriteByte(byte reg, byte data, bool send = false) {
-            byte[] wbuf = new byte[5];
+        public void WriteByte(byte reg, byte data, bool send = false)
+        {
+            var wbuf = new byte[5];
             wbuf[0] = (byte) ((reg << 2) | 2);
             wbuf[1] = data;
             DoWrite(wbuf, false, send);
         }
 
-        void WriteReg(byte reg) {
-            byte[] wbuf = new byte[5];
+        public void WriteReg(byte reg, bool clear = false, bool send = false)
+        {
+            var wbuf = new byte[5];
             wbuf[0] = (byte)((reg << 2) | 2);
-            DoWrite(wbuf, false, false);
+            DoWrite(wbuf, clear, send);
         }
 
-        void DoWrite(byte[] wbuf, bool clear = false, bool send = true)
+        private void DoWrite(byte[] wbuf, bool clear = false, bool send = true)
         {
             if (clear)
                 _wrapper.ClearOutputBuffer();
             _wrapper.EnableSpiChip();
-            _wrapper.AddWriteOutBuffer(0x28, wbuf);
+            _wrapper.AddWriteOutBuffer(0x8, wbuf);
             _wrapper.DisableSpiChip();
             if (send)
                 _wrapper.SendBytesToDevice();
         }
-
     }
 }
