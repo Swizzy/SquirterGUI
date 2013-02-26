@@ -209,86 +209,89 @@ namespace SquirterGUI {
 
         #region Structs
 
-        public struct FtcCloseFinalStatePins {
-            public bool BtckPinActiveState;
-            public bool BtckPinState;
-            public bool BtdiPinActiveState;
-            public bool BtdiPinState;
-            public bool BTmsPinActiveState;
-            public bool BTmsPinState;
-        }
+        //public struct FtcCloseFinalStatePins {
+        //    public bool BtckPinActiveState;
+        //    public bool BtckPinState;
+        //    public bool BtdiPinActiveState;
+        //    public bool BtdiPinState;
+        //    public bool BTmsPinActiveState;
+        //    public bool BTmsPinState;
+        //}
 
-        public struct FtcChipSelectPins {
+        // ReSharper disable NotAccessedField.Local
+        private struct FtcChipSelectPins {
             public bool Badbus3ChipSelectPinState;
             public bool Badbus4GPIOL1PinState;
             public bool Badbus5GPIOL2PinState;
             public bool Badbus6GPIOL3PinState;
             public bool Badbus7GPIOL4PinState;
         }
+        // ReSharper restore NotAccessedField.Local
 
-        public struct FtcHigherOutputPins {
-            public bool BPin1ActiveState;
-            public bool BPin1State;
-            public bool BPin2ActiveState;
-            public bool BPin2State;
-            public bool BPin3ActiveState;
-            public bool BPin3State;
-            public bool BPin4ActiveState;
-            public bool BPin4State;
-        }
+        //public struct FtcHigherOutputPins {
+        //    public bool BPin1ActiveState;
+        //    public bool BPin1State;
+        //    public bool BPin2ActiveState;
+        //    public bool BPin2State;
+        //    public bool BPin3ActiveState;
+        //    public bool BPin3State;
+        //    public bool BPin4ActiveState;
+        //    public bool BPin4State;
+        //}
 
-        public struct FtcInitCondition {
-            public bool BChipSelectPinState;
-            public bool BClockPinState;
-            public bool BDataOutPinState;
-            public bool ChipSelectPinValue;
-        }
+        //public struct FtcInitCondition {
+        //    public bool BChipSelectPinState;
+        //    public bool BClockPinState;
+        //    public bool BDataOutPinState;
+        //    public bool ChipSelectPinValue;
+        //}
 
-        public struct FtcInputOutputPins {
-            public bool BPin1InputOutputState;
-            public bool BPin1LowHighState;
-            public bool BPin2InputOutputState;
-            public bool BPin2LowHighState;
-            public bool BPin3InputOutputState;
-            public bool BPin3LowHighState;
-            public bool BPin4InputOutputState;
-            public bool BPin4LowHighState;
-        }
+        //public struct FtcInputOutputPins {
+        //    public bool BPin1InputOutputState;
+        //    public bool BPin1LowHighState;
+        //    public bool BPin2InputOutputState;
+        //    public bool BPin2LowHighState;
+        //    public bool BPin3InputOutputState;
+        //    public bool BPin3LowHighState;
+        //    public bool BPin4InputOutputState;
+        //    public bool BPin4LowHighState;
+        //}
 
-        public struct FtcLowHighPins {
-            public bool BPin1LowHighState;
-            public bool BPin2LowHighState;
-            public bool BPin3LowHighState;
-            public bool BPin4LowHighState;
-        }
+        //public struct FtcLowHighPins {
+        //    public bool BPin1LowHighState;
+        //    public bool BPin2LowHighState;
+        //    public bool BPin3LowHighState;
+        //    public bool BPin4LowHighState;
+        //}
 
-        public struct FtcWaitDataWrite {
-            public bool BDataWriteCompleteState;
-            public bool BWaitDataWriteComplete;
-            public uint DataWriteTimeoutmSecs;
-            public uint WaitDataWritePin;
-        }
+        //public struct FtcWaitDataWrite {
+        //    public bool BDataWriteCompleteState;
+        //    public bool BWaitDataWriteComplete;
+        //    public uint DataWriteTimeoutmSecs;
+        //    public uint WaitDataWritePin;
+        //}
 
-        public struct FthHigherOutputPins {
-            public bool BPin1ActiveState;
-            public bool BPin1State;
-            public bool BPin2ActiveState;
-            public bool BPin2State;
-            public bool BPin3ActiveState;
-            public bool BPin3State;
-            public bool BPin4ActiveState;
-            public bool BPin4State;
-            public bool BPin5ActiveState;
-            public bool BPin5State;
-            public bool BPin6ActiveState;
-            public bool BPin6State;
-            public bool BPin7ActiveState;
-            public bool BPin7State;
-            public bool BPin8ActiveState;
-            public bool BPin8State;
-        }
+        //public struct FthHigherOutputPins {
+        //    public bool BPin1ActiveState;
+        //    public bool BPin1State;
+        //    public bool BPin2ActiveState;
+        //    public bool BPin2State;
+        //    public bool BPin3ActiveState;
+        //    public bool BPin3State;
+        //    public bool BPin4ActiveState;
+        //    public bool BPin4State;
+        //    public bool BPin5ActiveState;
+        //    public bool BPin5State;
+        //    public bool BPin6ActiveState;
+        //    public bool BPin6State;
+        //    public bool BPin7ActiveState;
+        //    public bool BPin7State;
+        //    public bool BPin8ActiveState;
+        //    public bool BPin8State;
+        //}
 
-        public struct FthInputOutputPins {
+        // ReSharper disable NotAccessedField.Local
+        private struct FthInputOutputPins {
             public bool BPin1InputOutputState;
             public bool BPin1LowHighState;
             public bool BPin2InputOutputState;
@@ -306,17 +309,18 @@ namespace SquirterGUI {
             public bool BPin8InputOutputState;
             public bool BPin8LowHighState;
         }
+        // ReSharper restore NotAccessedField.Local
 
-        public struct FthLowHighPins {
-            public bool BPin1LowHighState;
-            public bool BPin2LowHighState;
-            public bool BPin3LowHighState;
-            public bool BPin4LowHighState;
-            public bool BPin5LowHighState;
-            public bool BPin6LowHighState;
-            public bool BPin7LowHighState;
-            public bool BPin8LowHighState;
-        }
+        //public struct FthLowHighPins {
+        //    public bool BPin1LowHighState;
+        //    public bool BPin2LowHighState;
+        //    public bool BPin3LowHighState;
+        //    public bool BPin4LowHighState;
+        //    public bool BPin5LowHighState;
+        //    public bool BPin6LowHighState;
+        //    public bool BPin7LowHighState;
+        //    public bool BPin8LowHighState;
+        //}
 
         #endregion Structs
 
@@ -472,14 +476,27 @@ namespace SquirterGUI {
             if (_dwNumBytesToSend > MaxNumBytesUsbWrite) {
                 do {
                     uint dwNumDataBytesToSend;
-                    if ((dwTotalNumBytesSent + MaxNumBytesUsbWrite) <= _dwNumBytesToSend)
-                        dwNumDataBytesToSend = MaxNumBytesUsbWrite;
-                    else
-                        dwNumDataBytesToSend = (_dwNumBytesToSend - dwTotalNumBytesSent);
+                    if (numBytesSent != 0)
+                    {
+                        var tmp = new byte[_dwNumBytesToSend - dwTotalNumBytesSent];
+                        Buffer.BlockCopy(_byOutputBuffer, (int)numBytesSent, tmp, 0, tmp.Length);
+                        ClearOutputBuffer();
+                        Buffer.BlockCopy(tmp, 0, _byOutputBuffer, 0, tmp.Length);
+                        if ((dwTotalNumBytesSent + MaxNumBytesUsbWrite) <= _dwNumBytesToSend)
+                            dwNumDataBytesToSend = MaxNumBytesUsbWrite;
+                        else 
+                            dwNumDataBytesToSend = (uint) tmp.Length;
+                    }
+                    else {
+                        if ((dwTotalNumBytesSent + MaxNumBytesUsbWrite) <= _dwNumBytesToSend)
+                            dwNumDataBytesToSend = MaxNumBytesUsbWrite;
+                        else
+                            dwNumDataBytesToSend = _dwNumBytesToSend - dwTotalNumBytesSent;   
+                    }
                     _status = (uint)_ftdi.Write(_byOutputBuffer, dwNumDataBytesToSend, ref numBytesSent);
                     dwTotalNumBytesSent = dwTotalNumBytesSent + numBytesSent;
                 }
-                while ((dwTotalNumBytesSent < _dwNumBytesToSend) && (_status == FtcSuccess));
+                while (dwTotalNumBytesSent < _dwNumBytesToSend && _status == FtcSuccess);
             }
             else
                 _status = (uint)_ftdi.Write(_byOutputBuffer, _dwNumBytesToSend, ref numBytesSent);
@@ -507,10 +524,11 @@ namespace SquirterGUI {
             AddByteToOutputBuffer(SendAnswerBackImmediatelyCmd, false);	
         }
 
-        public bool GetDataFromDevice(uint dwNumBytesToRead, ref byte[] readDataBuffer, int offset)
+        public bool GetDataFromDevice(uint dwNumBytesToRead, ref byte[] readDataBuffer)
         {
             if (IntPtr.Zero == _ftdi.GetFtHandle())
                 _ftdi.SetFtHandle(_ftHandle);
+            var offset = 0;
             uint dwNumBytesRead = 0;
             var tryCount = 10;
             do {

@@ -31,7 +31,7 @@
         private static void ClearStatus() {
             //var buf = new byte[] { 0,2,0,0 }; //Is it really needed?
             var buf = _xspi.ReadSync(4, 4);
-            _xspi.WriteSync(4, buf);
+            _xspi.Write(4, buf);
         }
 
         public void SetConfig(uint config) {
@@ -40,7 +40,6 @@
 
         public static uint FlashDataInit() {
             _xspi.EnterFlashMode();
-            //_xspi.ReadSync(0, 4);
             var ret = _xspi.ReadSync(0, 4);
             if (ret == null || (ret[0] == ret[1] && ret[0] == ret[2] && ret[0] == ret[3]))
                 return 0;
@@ -170,50 +169,68 @@
         {
             var fi = new FileInfo(filename);
             var handle = fi.OpenWrite();
+            var currpage = 0;
             for (var block = start; block <= last; block++)
             {
-                if (mode == (int)BwArgs.Modes.Raw)
-                    ReadRaw(ref handle, ref block, ref nandopts, last);
+                Main.SendStatus(block, last);
+                for (var page = 0; page < nandopts.PagesInBlock; page++)
+                {
+                    if (mode == (int) BwArgs.Modes.Raw)
+                        ReadRaw(ref handle, ref currpage, ref nandopts);
+                    currpage++;
+                }
             }
+            handle.Close();
         }
 
-        private static void ReadRaw(ref FileStream handle, ref int block, ref XNANDSettings nandopts, int last) {
+        private static void ReadRaw(ref FileStream handle, ref int page, ref XNANDSettings nandopts) {
             var len = nandopts.PageSzPhys/4;
             var pagesleft = 0;
-            uint status = 0;
             while (len > 0) {
-                Main.SendStatus(block, last);
                 if (pagesleft == 0) {
-                    status |= ReadRawInit((uint)block);
-                    block++;
+                    ReadRawInit((uint)page);
                     pagesleft = 0x84;
                 }
                 var readnow = (len < pagesleft)? len: pagesleft;
-                ReadRawProc(ref handle, ref block, readnow);
+                ReadRawProc(ref handle, readnow);
                 pagesleft-= readnow;
                 len-= readnow;
             }
         }
 
-        private static uint ReadRawInit(uint block) {
+        private static void ReadRawInit(uint page) {
             ClearStatus();
-            _xspi.WriteWord(0x0C, block << 9);
+            _xspi.WriteWord(0x0C, page << 9);
             _xspi.WriteByte(0x08, 0x03, true);
             if (!WaitReady(0x1000))
-                return 0x8011;
+                return;
             _xspi.WriteReg(0x0C, true, true);
-            return 0;
         }
 
-        private static void ReadRawProc(ref FileStream handle, ref int block, int pages) {
+        private static void ReadRawProc(ref FileStream handle, int pages) {
             var len = pages;
             while (pages-- > 0) {
                 _xspi.WriteReg(0x08);
-                _xspi.Read(0x10, 4, false);
+                _xspi.Read(0x10, 4, 32, false, false);
             }
             var data = _xspi.ReadSendReceive(len*4);
             if (data != null)
                 handle.Write(data, 0, data.Length);
+        }
+
+        public static void Erase(int start, int last, ref XNAND nandopts) {
+            for (var block = start; block <= last; block++)
+            {
+                Main.SendStatus(block, last);
+                EraseBlock(block);
+            }
+        }
+
+        private static void EraseBlock(int block) {
+            ClearStatus();
+            var tmp = _xspi.ReadSync(0, 4);
+            tmp[0] |= 0x08;
+            _xspi.Write(0, tmp);
         }
     }
 }

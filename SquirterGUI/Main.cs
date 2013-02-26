@@ -51,6 +51,13 @@ namespace SquirterGUI
             writebtn.Enabled = state;
         }
 
+        private void SetInfo(long start, long count, int maxval)
+        {
+            progressbar.Maximum = maxval;
+            startblockoutbox.Text = string.Format("0x{0:X}", start);
+            totalblockoutbox.Text = string.Format("0x{0:X}", count);
+        }
+
         bool BwInit(ref XNAND worker) {
             var config = XNAND.FlashDataInit();
             if (config > 0) {
@@ -70,7 +77,7 @@ namespace SquirterGUI
             if (args.BlockCount > nandopt.SizeBlocks - 1)
                 args.BlockCount = 0;
             if (args.BlockCount == 0 || args.StartBlock + args.BlockCount > nandopt.SizeBlocks - 1)
-                args.BlockCount = nandopt.SizeBlocks - args.StartBlock - 1;
+                args.BlockCount = nandopt.SizeBlocks - args.StartBlock;
             if (args.Pages == 0)
                 args.Pages = nandopt.PagesInBlock * nandopt.SizeBlocks;
             return nandopt;
@@ -115,8 +122,8 @@ namespace SquirterGUI
             else
                 return;
             var nandopt = BwFixArgs(ref args, ref worker);
-            progressbar.Maximum = (int) (args.StartBlock + args.BlockCount);
-            XNAND.Read(args.Filename, (int) args.StartBlock, (int) (args.StartBlock + args.BlockCount), args.Mode, ref nandopt);
+            SetInfo(args.StartBlock, args.BlockCount, (int) (args.StartBlock + args.BlockCount - 1));
+            XNAND.Read(args.Filename, (int) args.StartBlock, (int) (args.StartBlock + args.BlockCount - 1), args.Mode, ref nandopt);
             e.Result = 0;
         }
 
@@ -191,15 +198,23 @@ namespace SquirterGUI
             bw.DoWork -= BwRead;
             bw.DoWork -= BwErase;
             bw.DoWork -= BwWrite;
+            var msg = "";
             if (e.Result is int) {
-                if (((int) e.Result) == -1)
-                    MessageBox.Show(Resources.error_init_ftdi, Resources.error_title, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                else if (((int) e.Result) == -2) 
-                    MessageBox.Show(Resources.error_bad_config, Resources.error_title, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                else if (((int) e.Result) < 0)
-                    MessageBox.Show(Resources.error_unkown, Resources.error_title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                switch (((int) e.Result)) {
+                    case -1:
+                        msg = Resources.error_init_ftdi;
+                        break;
+                    case -2:
+                        msg = Resources.error_bad_config;
+                        break;
+                    default:
+                        msg = Resources.error_unkown;
+                        break;
+                }
             }
-            //statuslabel.Text = Resources.bw_completemsg;
+            if (((int) e.Result) < 0)
+                MessageBox.Show(msg, Resources.error_title, MessageBoxButtons.OK, MessageBoxIcon.Error);
+            statuslabel.Text = Resources.bw_completemsg;
             SetButtonState(true);
         }
 
