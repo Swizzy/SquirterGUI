@@ -5,7 +5,7 @@
     using SquirterGUI.Properties;
 
     internal class XNAND {
-        public bool IsOk;
+        public readonly bool IsOk;
         private uint _config;
         private static XSPI _xspi;
 
@@ -38,12 +38,13 @@
             _config = config;
         }
 
-        public uint FlashDataInit() {
+        public static uint FlashDataInit() {
             _xspi.EnterFlashMode();
+            //_xspi.ReadSync(0, 4);
             var ret = _xspi.ReadSync(0, 4);
             if (ret == null || (ret[0] == ret[1] && ret[0] == ret[2] && ret[0] == ret[3]))
                 return 0;
-            return BitConverter.ToUInt32(ret, 0) / 0x100;
+            return BitConverter.ToUInt32(ret, 0);
         }
 
         public XNANDSettings GetSettings() {
@@ -165,26 +166,32 @@
             return sfc;
         }
 
-        public void Read(string filename, int start, int last, long pages, int mode, ref XNANDSettings nandopts)
+        public static void Read(string filename, int start, int last, int mode, ref XNANDSettings nandopts)
         {
             var fi = new FileInfo(filename);
             var handle = fi.OpenWrite();
-            for (var block = start;block <= last; block++) {
-                Main.SendStatus(block, last);
-                ReadRaw(ref handle, (uint)block, ref nandopts);
+            for (var block = start; block <= last; block++)
+            {
+                if (mode == (int)BwArgs.Modes.Raw)
+                    ReadRaw(ref handle, ref block, ref nandopts, last);
             }
         }
 
-        private static void ReadRaw(ref FileStream handle, uint block, ref XNANDSettings nandopts) {
-            //NandReadCB(data, blocksize);
+        private static void ReadRaw(ref FileStream handle, ref int block, ref XNANDSettings nandopts, int last) {
             var len = nandopts.PageSzPhys/4;
             var pagesleft = 0;
             uint status = 0;
             while (len > 0) {
+                Main.SendStatus(block, last);
                 if (pagesleft == 0) {
-                    pagesleft = len;
-                    status |= ReadRawInit(block);
+                    status |= ReadRawInit((uint)block);
+                    block++;
+                    pagesleft = 0x84;
                 }
+                var readnow = (len < pagesleft)? len: pagesleft;
+                ReadRawProc(ref handle, ref block, readnow);
+                pagesleft-= readnow;
+                len-= readnow;
             }
         }
 
@@ -196,6 +203,17 @@
                 return 0x8011;
             _xspi.WriteReg(0x0C, true, true);
             return 0;
+        }
+
+        private static void ReadRawProc(ref FileStream handle, ref int block, int pages) {
+            var len = pages;
+            while (pages-- > 0) {
+                _xspi.WriteReg(0x08);
+                _xspi.Read(0x10, 4, false);
+            }
+            var data = _xspi.ReadSendReceive(len*4);
+            if (data != null)
+                handle.Write(data, 0, data.Length);
         }
     }
 }

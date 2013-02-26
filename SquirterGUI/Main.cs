@@ -52,7 +52,7 @@ namespace SquirterGUI
         }
 
         bool BwInit(ref XNAND worker) {
-            var config = worker.FlashDataInit();
+            var config = XNAND.FlashDataInit();
             if (config > 0) {
                 flashconfigbox.Text = string.Format("0x{0:X8}", config);
                 worker.SetConfig(config);
@@ -116,7 +116,7 @@ namespace SquirterGUI
                 return;
             var nandopt = BwFixArgs(ref args, ref worker);
             progressbar.Maximum = (int) (args.StartBlock + args.BlockCount);
-            worker.Read(args.Filename, (int) args.StartBlock, (int) (args.StartBlock + args.BlockCount), args.Pages, args.Mode, ref nandopt);
+            XNAND.Read(args.Filename, (int) args.StartBlock, (int) (args.StartBlock + args.BlockCount), args.Mode, ref nandopt);
             e.Result = 0;
         }
 

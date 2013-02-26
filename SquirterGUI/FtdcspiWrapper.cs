@@ -325,7 +325,7 @@ namespace SquirterGUI {
         readonly FTDI _ftdi = new FTDI();
 
         private uint _status;
-        byte[] _byOutputBuffer = new byte[65535];
+        byte[] _byOutputBuffer = new byte[0xffff];
         byte _dwLowPinsValue;
         uint _dwNumBytesToSend; // Index to the output buffer
         uint _dwNumBytesSent; // Count of actual bytes sent - used with FT_Write
@@ -489,13 +489,16 @@ namespace SquirterGUI {
         public void ClearOutputBuffer()
         {
             _dwNumBytesToSend = 0;
+            _byOutputBuffer = new byte[0xffff];
+            GC.Collect();
         }
 
         private void AddByteToOutputBuffer(byte dataByte, bool bClearOutputBuffer)
         {
             if(bClearOutputBuffer)
                 ClearOutputBuffer();
-            Array.Resize(ref _byOutputBuffer, _byOutputBuffer.Length + 1);
+            if (_byOutputBuffer.Length == _dwNumBytesToSend)
+                Array.Resize(ref _byOutputBuffer, _byOutputBuffer.Length + 1);
             _byOutputBuffer[_dwNumBytesToSend++] = dataByte;
         }
 
@@ -528,6 +531,7 @@ namespace SquirterGUI {
         {
             AddByteToOutputBuffer(SetLowByteDataBitsCmd, false);
             _dwLowPinsValue = (byte) (_dwLowPinsValue | ChipSelectPin); // set CS to low
+            //0x38
             // set SK, DO, CS and GPIOL1-4 as output, set D1 as input
             AddByteToOutputBuffer(_dwLowPinsValue, false);
             AddByteToOutputBuffer(0xFB, false);
@@ -553,7 +557,7 @@ namespace SquirterGUI {
             // adjust for bit count of 1 less than no of bits
             var dwModNumControlBitsToWrite = dwNumControlBitsToWrite - 1;
             // Number of control bytes is greater than 0, only if the minimum number of control bits is 8
-            var dwNumControlBytes = dwModNumControlBitsToWrite / 8;
+            int dwNumControlBytes = (int)(dwModNumControlBitsToWrite / 8);
 
             if (dwNumControlBytes > 0)
             {
@@ -622,6 +626,7 @@ namespace SquirterGUI {
             _dwNumBytesToSend = 0; // Index to the output buffer
             _dwNumBytesSent = 0; // Count of actual bytes sent - used with FT_Write
             _byOutputBuffer[_dwNumBytesToSend++] = 0x80;
+            _dwLowPinsValue = (byte)(_dwLowPinsValue & ~0x10);
             _dwLowPinsValue = (byte) (chipSelect ? 0x08 : 0x00);
             _byOutputBuffer[_dwNumBytesToSend++] = _dwLowPinsValue;
             _byOutputBuffer[_dwNumBytesToSend++] = 0x3E; // byDirection
@@ -636,15 +641,8 @@ namespace SquirterGUI {
             _dwNumBytesToSend = 0; // Index to the output buffer
             _dwNumBytesSent = 0; // Count of actual bytes sent - used with FT_Write
             _byOutputBuffer[_dwNumBytesToSend++] = 0x80;
-            _dwLowPinsValue = 0;
-            if (xxLo)
-                _dwLowPinsValue = (byte) (_dwLowPinsValue | 0x10);
-            else 
-                _dwLowPinsValue = (byte) (_dwLowPinsValue | 0x00);
-            if (ejLo)
-                _dwLowPinsValue = (byte)(_dwLowPinsValue | 0x20);
-            else
-                _dwLowPinsValue = (byte)(_dwLowPinsValue | 0x00);
+            _dwLowPinsValue = (byte) (_dwLowPinsValue & ~0x30);
+            _dwLowPinsValue = (byte) (_dwLowPinsValue | (xxLo ? 0x10 : 0x00) | (ejLo ? 0x20: 0x00));
             _byOutputBuffer[_dwNumBytesToSend++] = _dwLowPinsValue; 
             _byOutputBuffer[_dwNumBytesToSend++] = 0x3E; // byDirection
             _ftdi.Write(_byOutputBuffer, _dwNumBytesToSend, ref _dwNumBytesSent);
