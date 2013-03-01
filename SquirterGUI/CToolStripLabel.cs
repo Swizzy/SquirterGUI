@@ -1,5 +1,6 @@
 namespace SquirterGUI {
     using System;
+    using System.ComponentModel;
     using System.Windows.Forms;
 
     public class CToolStripLabel : ToolStripStatusLabel {
@@ -7,6 +8,7 @@ namespace SquirterGUI {
 
         private delegate void SetText(string text);
 
+        [Localizable(false)]
         public override string Text {
             get {
                 if (Parent != null && Parent.InvokeRequired) {

@@ -1,17 +1,20 @@
 ﻿namespace SquirterGUI {
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Windows.Forms;
     using SquirterGUI.Properties;
 
     internal class XNAND {
         public readonly bool IsOk;
-        private uint _config;
+        public static bool Abort;
+        private static uint _config;
         private static XSPI _xspi;
 
         public XNAND() {
             _xspi = new XSPI();
             IsOk = _xspi.IsOk;
+            Abort = false;
         }
 
         private static bool WaitReady(uint timeout) {
@@ -20,21 +23,19 @@
                     return true;
             }
             while (timeout-- > 0);
-
             return false;
         }
 
-        private uint GetStatus() {
+        private static uint GetStatus() {
             return _xspi.ReadWord(0x04);
         }
 
         private static void ClearStatus() {
-            //var buf = new byte[] { 0,2,0,0 }; //Is it really needed?
             var buf = _xspi.ReadSync(4, 4);
             _xspi.Write(4, buf);
         }
 
-        public void SetConfig(uint config) {
+        public static void SetConfig(uint config) {
             _config = config;
         }
 
@@ -46,7 +47,7 @@
             return BitConverter.ToUInt32(ret, 0);
         }
 
-        public XNANDSettings GetSettings() {
+        public static XNANDSettings GetSettings() {
             var sfc = new XNANDSettings {
                                             MetaType = 0,
                                             PageSz = 0x200,
@@ -165,40 +166,84 @@
             return sfc;
         }
 
+        private static void LogInit(string filename, int start, int last, int mode, ref XNANDSettings nandopts, string process, string modename = "")
+        {
+            Logger.WriteLine2("=========================================================================");
+            Logger.WriteLine2(Main.AppNameAndVersion);
+            Logger.WriteLine2(string.Format("Log started: {0:yyyy-MM-dd HH:mm:ss}", DateTime.Now));
+            Logger.WriteLine2(string.Format("Started {0} NAND With the following settings:", process));
+            Logger.WriteLine2(!string.IsNullOrEmpty(filename)
+                ? string.Format("Filename & Path: {1}{0}First block: 0x{2:X}{0}Last Block: 0x{3:X}", Environment.NewLine, filename, start,last)
+                : string.Format("First block: 0x{1:X}{0}Last Block: 0x{2:X}", Environment.NewLine, start, last));
+            if (mode != 0) {
+                Logger.Write2(string.Format("{0} Mode: ", modename));
+                switch (mode) {
+                    case (int) BwArgs.Modes.Raw:
+                        Logger.WriteLine2("RAW");
+                        break;
+                    case (int) BwArgs.Modes.Glitch:
+                        Logger.WriteLine2("Glitch");
+                        break;
+                }
+            }
+            Logger.WriteLine2("Nand Information:");
+            Logger.WriteLine2(string.Format("config register = 0x{0:X08}", _config));
+            Logger.WriteLine2(string.Format("page data size  = 0x{0:X}", nandopts.PageSz));
+            Logger.WriteLine2(string.Format("meta size       = 0x{0:X}", nandopts.MetaSz));
+            Logger.WriteLine2(string.Format("page size       = 0x{0:X}", nandopts.PageSzPhys));
+            Logger.WriteLine2(string.Format("pages per block = 0x{0:X}", nandopts.PagesInBlock));
+            Logger.WriteLine2(string.Format("total pages     = 0x{0:X}", nandopts.SizePages));
+            Logger.WriteLine2(string.Format("total blocks    = 0x{0:X}", nandopts.SizeBlocks));
+            Logger.WriteLine2("=========================================================================");
+        }
+
         public static void Read(string filename, int start, int last, int mode, ref XNANDSettings nandopts)
         {
+            var sw = new Stopwatch();
+            sw.Start();
+            LogInit(filename, start, last, mode, ref nandopts, "dumping", "Read");
             var fi = new FileInfo(filename);
+            if (fi.Exists)
+                fi.Delete();
             var handle = fi.OpenWrite();
             var currpage = 0;
             for (var block = start; block <= last; block++)
             {
+                if (Abort) {
+                    Main.SendAbort();
+                    sw.Stop();
+                    handle.Close();
+                    Logger.WriteLine2(string.Format("Dumping aborted after: {0} Minutes and {1} seconds", sw.Elapsed.Minutes, sw.Elapsed.Seconds));
+                    break;
+                }
+                ClearStatus();
                 Main.SendStatus(block, last);
-                for (var page = 0; page < nandopts.PagesInBlock; page++)
-                {
-                    if (mode == (int) BwArgs.Modes.Raw)
-                        ReadRaw(ref handle, ref currpage, ref nandopts);
+                for (var page = 0; page < nandopts.PagesInBlock; page++) {
+                    var len = nandopts.PageSzPhys / 4;
+                    var pagesleft = 0;
+                    while (len > 0) {
+                        if (pagesleft == 0) {
+                            ReadPageInit((uint)currpage);
+                            pagesleft = 0x84;
+                        }
+                        var readnow = (len < pagesleft) ? len : pagesleft;
+                        ReadProc(ref handle, readnow, ref nandopts, mode);
+                        pagesleft -= readnow;
+                        len -= readnow;
+                    }
                     currpage++;
                 }
+                var status = GetStatus();
+                if (status != 0x200)
+                    Main.SendError(block, status, "reading");
             }
+            sw.Stop();
             handle.Close();
+            Logger.WriteLine2(string.Format("Dumping completed after: {0} Minutes and {1} seconds", sw.Elapsed.Minutes, sw.Elapsed.Seconds));
         }
 
-        private static void ReadRaw(ref FileStream handle, ref int page, ref XNANDSettings nandopts) {
-            var len = nandopts.PageSzPhys/4;
-            var pagesleft = 0;
-            while (len > 0) {
-                if (pagesleft == 0) {
-                    ReadRawInit((uint)page);
-                    pagesleft = 0x84;
-                }
-                var readnow = (len < pagesleft)? len: pagesleft;
-                ReadRawProc(ref handle, readnow);
-                pagesleft-= readnow;
-                len-= readnow;
-            }
-        }
-
-        private static void ReadRawInit(uint page) {
+        private static void ReadPageInit(uint page)
+        {
             ClearStatus();
             _xspi.WriteWord(0x0C, page << 9);
             _xspi.WriteByte(0x08, 0x03, true);
@@ -207,23 +252,43 @@
             _xspi.WriteReg(0x0C, true, true);
         }
 
-        private static void ReadRawProc(ref FileStream handle, int pages) {
+        private static void ReadProc(ref FileStream handle, int pages, ref XNANDSettings nandopts, int mode) {
             var len = pages;
             while (pages-- > 0) {
                 _xspi.WriteReg(0x08);
                 _xspi.Read(0x10, 4, 32, false, false);
             }
             var data = _xspi.ReadSendReceive(len*4);
-            if (data != null)
-                handle.Write(data, 0, data.Length);
+            if (data == null)
+                return;
+            switch (mode) {
+                case (int) BwArgs.Modes.Raw:
+                    handle.Write(data, 0, data.Length);
+                    break;
+                case (int) BwArgs.Modes.Glitch:
+                    handle.Write(data, 0, data.Length - nandopts.MetaSz);
+                    break;
+            }
         }
 
-        public static void Erase(int start, int last, ref XNAND nandopts) {
+        public static void Erase(int start, int last, ref XNANDSettings nandopts) {
+            var sw = new Stopwatch();
+            sw.Start();
+            LogInit("", start, last, 0, ref nandopts, "erasing");
             for (var block = start; block <= last; block++)
             {
+                if (Abort)
+                {
+                    Main.SendAbort();
+                    sw.Stop();
+                    Logger.WriteLine2(string.Format("Erasing aborted after: {0} Minutes and {1} seconds", sw.Elapsed.Minutes, sw.Elapsed.Seconds));
+                    break;
+                }
                 Main.SendStatus(block, last);
                 EraseBlock(block);
             }
+            sw.Stop();
+            Logger.WriteLine2(string.Format("Erasing completed after: {0} Minutes and {1} seconds", sw.Elapsed.Minutes, sw.Elapsed.Seconds));
         }
 
         private static void EraseBlock(int block) {
@@ -231,6 +296,97 @@
             var tmp = _xspi.ReadSync(0, 4);
             tmp[0] |= 0x08;
             _xspi.Write(0, tmp);
+            _xspi.WriteWord(0x0C, (uint)(block << 9), false);
+            _xspi.WriteByte(0x08, 0xAA);
+            _xspi.WriteByte(0x08, 0x55);
+            _xspi.WriteByte(0x08, 0x5, true);
+            if (WaitReady(0x1000))
+                return;
+            var status = GetStatus();
+            if (status != 0x200)
+                Main.SendError(block, status, "erasing");
+        }
+
+        public static void Write(string filename, int start, int last, int mode, ref XNANDSettings nandopts)
+        {
+            var sw = new Stopwatch();
+            sw.Start();
+            LogInit(filename, start, last, mode, ref nandopts, "writing", "Write");
+            var fi = new FileInfo(filename);
+            if (fi.Exists)
+                fi.Delete();
+            var handle = fi.OpenRead();
+            var currpage = 0;
+            for (var block = start; block <= last; block++)
+            {
+                if (Abort)
+                {
+                    Main.SendAbort();
+                    sw.Stop();
+                    handle.Close();
+                    Logger.WriteLine2(string.Format("Writing aborted after: {0} Minutes and {1} seconds", sw.Elapsed.Minutes, sw.Elapsed.Seconds));
+                    break;
+                }
+                ClearStatus();
+                Main.SendStatus(block, last);
+                for (var page = 0; page < nandopts.PagesInBlock; page++)
+                {
+                    var pagesleft = 0;
+                    if (currpage % nandopts.PagesInBlock == 0)
+                    {
+                        EraseBlock(block);
+                        pagesleft = 0x84;
+                        WritePageInit();
+                    }
+                    var len = nandopts.PageSzPhys / 4;
+                    while (len > 0)
+                    {
+                        //TODO: Add crap to deal with ECC patching
+                        //TODO: fix write shit
+                        var writenow = (len < pagesleft) ? len : pagesleft;
+                        WriteProc(data, writenow);
+                        pagesleft -= writenow;
+                        len -= writenow;
+                    }
+                    currpage++;
+                }
+                var status = GetStatus();
+                if (status != 0x200)
+                    Main.SendError(block, status, "Writing");
+            }
+            sw.Stop();
+            handle.Close();
+            Logger.WriteLine2(string.Format("Writing completed after: {0} Minutes and {1} seconds", sw.Elapsed.Minutes, sw.Elapsed.Seconds));
+        }
+
+        private static void WritePageInit()
+        {
+            _xspi.WriteReg(0x0C, true, true);
+        }
+
+        private static void WriteProc(byte[] data, int pages)
+        {
+            var offset = 0;
+            var buf = new byte[4];
+            while (pages-- > 0)
+            {
+                Array.Copy(data, offset, buf, 0, 4);
+                _xspi.Write(0x10, buf, false, false);
+                _xspi.WriteByte(0x08, 0x01);
+                offset += 4;
+            }
+        }
+
+        private static void WriteExecute(int block) {
+            _xspi.WriteWord(0x0C, (uint)(block << 9));
+            _xspi.WriteByte(0x08, 0x55);
+            _xspi.WriteByte(0x08, 0xAA);
+            _xspi.WriteByte(0x08, 0x4, true);
+            if (WaitReady(0x1000))
+                return;
+            var status = GetStatus();
+            if (status != 0x200)
+                Main.SendError(block, status, "writing");
         }
     }
 }

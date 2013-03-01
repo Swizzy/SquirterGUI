@@ -118,24 +118,34 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="error_init_ftdi" xml:space="preserve">
-    <value>ERROR: Unable to initialize FTDI!</value>
+    <value>ERROR: Unable to initialize FTDI! Do you have it connected?</value>
   </data>
   <data name="error_title" xml:space="preserve">
     <value>ERROR</value>
   </data>
-  <data name="ftdi_fail_installed">
-    <value xml:space="preserve">Failed to load FTD2XX.DLL.  Are the FTDI drivers installed?</value>
+  <data name="ftdi_fail_installed" xml:space="preserve">
+    <value>Failed to load FTD2XX.DLL.  Are the FTDI drivers installed?</value>
   </data>
-  <data name="error_unsupported">
-    <value xml:space="preserve">ERROR: Unsupported type!</value>
+  <data name="error_unsupported" xml:space="preserve">
+    <value>ERROR: Unsupported type!</value>
   </data>
-  <data name="error_bad_config">
-    <value xml:space="preserve">ERROR: Bad flashconfig (This is often caused by bad connection to the NAND... check your soldering!</value>
+  <data name="error_bad_config" xml:space="preserve">
+    <value>ERROR: Bad flashconfig (This is often caused by bad connection to the NAND... check your soldering!)</value>
   </data>
-  <data name="error_unkown">
-    <value xml:space="preserve">ERROR: an Unkown error has occured...</value>
+  <data name="error_unkown" xml:space="preserve">
+    <value>ERROR: an Unkown error has occured...</value>
   </data>
-  <data name="bw_completemsg">
-    <value xml:space="preserve">Done! Waiting for further instructions...</value>
+  <data name="bw_completemsg" xml:space="preserve">
+    <value>Done! Waiting for further instructions...</value>
+  </data>
+  <data name="AreYouSureYouWantToAbort" xml:space="preserve">
+    <value>Are you sure you want to abort?</value>
+  </data>
+  <data name="AreYouSure" xml:space="preserve">
+    <value>Are you sure about this?</value>
+  </data>
+  <data name="AreYouSureErase">
+    <value xml:space="preserve">Are you sure you want to erase this nand?
+You WILL lose any data that is there now...</value>
   </data>
 </root>

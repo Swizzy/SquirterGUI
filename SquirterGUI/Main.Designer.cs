@@ -1,6 +1,6 @@
 ﻿namespace SquirterGUI
 {
-    partial class Main
+    sealed partial class Main
     {
         /// <summary>
         /// Required designer variable.
@@ -59,6 +59,7 @@
             this.sfd = new System.Windows.Forms.SaveFileDialog();
             this.ofd = new System.Windows.Forms.OpenFileDialog();
             this.tooltip = new System.Windows.Forms.ToolTip(this.components);
+            this.abortbtn = new System.Windows.Forms.Button();
             this.settingsbox.SuspendLayout();
             this.modebox.SuspendLayout();
             this.statusStrip1.SuspendLayout();
@@ -162,7 +163,7 @@
             this.rawmode.TabIndex = 2;
             this.rawmode.TabStop = true;
             this.rawmode.Text = "RAW";
-            this.tooltip.SetToolTip(this.rawmode, "Read/Write data in RAW mode means that we\'ll include ECC data");
+            this.tooltip.SetToolTip(this.rawmode, "Read/Write data in RAW mode means that it\'ll include ECC data");
             this.rawmode.UseVisualStyleBackColor = true;
             // 
             // sizebox
@@ -189,7 +190,7 @@
             this.statusStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.progressbar,
             this.statuslabel});
-            this.statusStrip1.Location = new System.Drawing.Point(0, 225);
+            this.statusStrip1.Location = new System.Drawing.Point(0, 254);
             this.statusStrip1.Name = "statusStrip1";
             this.statusStrip1.Size = new System.Drawing.Size(461, 22);
             this.statusStrip1.SizingGrip = false;
@@ -317,7 +318,7 @@
             this.errorbox.Location = new System.Drawing.Point(249, 128);
             this.errorbox.Name = "errorbox";
             this.errorbox.ReadOnly = true;
-            this.errorbox.Size = new System.Drawing.Size(200, 88);
+            this.errorbox.Size = new System.Drawing.Size(200, 123);
             this.errorbox.TabIndex = 9;
             this.errorbox.Text = "";
             // 
@@ -329,18 +330,31 @@
             // 
             this.sfd.DefaultExt = "bin";
             this.sfd.FileName = "flashdmp.bin";
-            this.sfd.Filter = "*.bin|Xbox 360 NAND";
+            this.sfd.Filter = "Xbox 360 NAND|*.bin";
             // 
             // ofd
             // 
             this.ofd.FileName = "openFileDialog1";
+            this.ofd.Filter = "Xbox 360 NAND|*.bin|XeLL image|*.ecc|All Files|*.*";
+            // 
+            // abortbtn
+            // 
+            this.abortbtn.Enabled = false;
+            this.abortbtn.Location = new System.Drawing.Point(12, 222);
+            this.abortbtn.Name = "abortbtn";
+            this.abortbtn.Size = new System.Drawing.Size(231, 23);
+            this.abortbtn.TabIndex = 10;
+            this.abortbtn.Text = "Abort";
+            this.abortbtn.UseVisualStyleBackColor = true;
+            this.abortbtn.Click += new System.EventHandler(this.AbortbtnClick);
             // 
             // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(224)))), ((int)(((byte)(224)))), ((int)(((byte)(224)))));
-            this.ClientSize = new System.Drawing.Size(461, 247);
+            this.ClientSize = new System.Drawing.Size(461, 276);
+            this.Controls.Add(this.abortbtn);
             this.Controls.Add(this.errorbox);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.infobox);
@@ -352,6 +366,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "Main";
             this.Text = "Form1";
+            this.Load += new System.EventHandler(this.MainLoad);
             this.settingsbox.ResumeLayout(false);
             this.settingsbox.PerformLayout();
             this.modebox.ResumeLayout(false);
@@ -397,6 +412,7 @@
         private System.Windows.Forms.SaveFileDialog sfd;
         private System.Windows.Forms.OpenFileDialog ofd;
         private System.Windows.Forms.ToolTip tooltip;
+        private System.Windows.Forms.Button abortbtn;
     }
 }
 

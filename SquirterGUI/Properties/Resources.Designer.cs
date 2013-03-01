@@ -22,7 +22,7 @@ namespace SquirterGUI.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace SquirterGUI.Properties {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("SquirterGUI.Properties.Resources", typeof(Resources).Assembly);
@@ -51,7 +51,7 @@ namespace SquirterGUI.Properties {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -61,27 +61,55 @@ namespace SquirterGUI.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Are you sure about this?.
+        /// </summary>
+        public static string AreYouSure {
+            get {
+                return ResourceManager.GetString("AreYouSure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Are you sure you want to erase this nand?
+        ///You WILL lose any data that is there now....
+        /// </summary>
+        public static string AreYouSureErase {
+            get {
+                return ResourceManager.GetString("AreYouSureErase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Are you sure you want to abort?.
+        /// </summary>
+        public static string AreYouSureYouWantToAbort {
+            get {
+                return ResourceManager.GetString("AreYouSureYouWantToAbort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Done! Waiting for further instructions....
         /// </summary>
-        internal static string bw_completemsg {
+        public static string bw_completemsg {
             get {
                 return ResourceManager.GetString("bw_completemsg", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ERROR: Bad flashconfig (This is often caused by bad connection to the NAND... check your soldering!.
+        ///   Looks up a localized string similar to ERROR: Bad flashconfig (This is often caused by bad connection to the NAND... check your soldering!).
         /// </summary>
-        internal static string error_bad_config {
+        public static string error_bad_config {
             get {
                 return ResourceManager.GetString("error_bad_config", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to ERROR: Unable to initialize FTDI!.
+        ///   Looks up a localized string similar to ERROR: Unable to initialize FTDI! Do you have it connected?.
         /// </summary>
-        internal static string error_init_ftdi {
+        public static string error_init_ftdi {
             get {
                 return ResourceManager.GetString("error_init_ftdi", resourceCulture);
             }
@@ -90,7 +118,7 @@ namespace SquirterGUI.Properties {
         /// <summary>
         ///   Looks up a localized string similar to ERROR.
         /// </summary>
-        internal static string error_title {
+        public static string error_title {
             get {
                 return ResourceManager.GetString("error_title", resourceCulture);
             }
@@ -99,7 +127,7 @@ namespace SquirterGUI.Properties {
         /// <summary>
         ///   Looks up a localized string similar to ERROR: an Unkown error has occured....
         /// </summary>
-        internal static string error_unkown {
+        public static string error_unkown {
             get {
                 return ResourceManager.GetString("error_unkown", resourceCulture);
             }
@@ -108,7 +136,7 @@ namespace SquirterGUI.Properties {
         /// <summary>
         ///   Looks up a localized string similar to ERROR: Unsupported type!.
         /// </summary>
-        internal static string error_unsupported {
+        public static string error_unsupported {
             get {
                 return ResourceManager.GetString("error_unsupported", resourceCulture);
             }
@@ -117,7 +145,7 @@ namespace SquirterGUI.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Failed to load FTD2XX.DLL.  Are the FTDI drivers installed?.
         /// </summary>
-        internal static string ftdi_fail_installed {
+        public static string ftdi_fail_installed {
             get {
                 return ResourceManager.GetString("ftdi_fail_installed", resourceCulture);
             }

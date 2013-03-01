@@ -59,7 +59,7 @@
         }
 
         public uint ReadWord(byte reg, bool sendReceive = true) {
-            var ret = Read(reg, 1, 0x10, true, sendReceive);
+            var ret = Read(reg, 2, 0x10, true, sendReceive);
             return ret != null ? ret[0] | ((uint) ret[1] << 8) : 0;
         }
 
